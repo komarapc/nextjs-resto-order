@@ -1,11 +1,89 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+"use client";
 
-const inter = Inter({ subsets: ['latin'] })
+import {
+  GetServerSideProps,
+  InferGetServerSidePropsType,
+  NextPage,
+} from "next";
+import { createRef, useEffect, useRef, useState } from "react";
 
-export default function Home() {
+import AppBar from "@/components/app-bar/app-bar";
+import { BodyWrapper } from "@/components/wrapper/wrapper";
+import { CartInfo } from "@/components/pages/cart";
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "next/font/google";
+import { ItemProps } from "@/interface/item";
+import { Modal } from "@/components/modal/modal";
+import { RootState } from "@/redux/store";
+import { add } from "@/redux/reducer/cart";
+import axios from "axios";
+import { nanoid } from "nanoid";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export default function Home({
+  categories,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const cartItems = useSelector((state: RootState) => state.cart);
+  const dispatch = useDispatch();
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [menuItems, setMenuItems] = useState<ItemProps[]>([]);
+  const [selectedItems, setSelectedItems] = useState<ItemProps>();
+  const [selectedInputElement, setSelectedInputElement] = useState<any>(null);
+  const [quantityOrder, setQuantityOrder] = useState<number>(1);
+  const [showModalCart, setShowModalCart] = useState<boolean>(false);
+  const [errQuantityOrder, setErrQuantityOrder] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (selectedCategory === "") {
+      axios.get("http://localhost:8000/items").then((res) => {
+        setMenuItems(res.data);
+      });
+    } else {
+      axios
+        .get(`http://localhost:8000/items?category=${selectedCategory}`)
+        .then((res) => {
+          setMenuItems(res.data);
+        });
+    }
+  }, [selectedCategory]);
+
+  const addToCart = ({
+    item,
+    elementInput,
+  }: {
+    item: ItemProps;
+    elementInput: any;
+  }) => {
+    const qty = parseInt(elementInput.value);
+    if (qty < 1) {
+      setErrQuantityOrder(true);
+      return;
+    } else {
+      setErrQuantityOrder(false);
+    }
+    setShowModalCart(true);
+    setSelectedItems(item);
+    setQuantityOrder(qty);
+    setSelectedInputElement(elementInput);
+  };
+
+  const closeModalCart = () => {
+    setShowModalCart(false);
+    setSelectedItems({});
+    selectedInputElement.value = 1;
+    setSelectedInputElement(null);
+  };
+
+  const saveCart = () => {
+    dispatch(
+      add({ item: selectedItems, order_quantity: quantityOrder, id: nanoid() })
+    );
+  };
+
   return (
     <>
       <Head>
@@ -14,110 +92,174 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
+      <BodyWrapper>
+        <AppBar />
+        <main className={inter.className}>
+          <div className="w-full h-80 bg-orange-500">
+            <div className="container h-full mx-auto flex flex-col justify-center p-5 md:p-0 gap-5">
+              <h1 className="text-6xl font-light text-white">Welcome</h1>
+              {/* tagline for delicious food */}
+              <p className="text-2xl font-light text-white">Enjoy your meal!</p>
+            </div>
+          </div>
+          <div className="w-full">
+            <div className="container mx-auto flex flex-row p-5 md:p-0">
+              <div className="w-full my-5 flex gap-2">
+                <span
+                  className={`text-lg capitalize px-4 py-2 rounded-lg cursor-pointer transition duration-300 ease-in-out ${
+                    selectedCategory === ""
+                      ? "bg-orange-500 text-white hover:bg-orange-600"
+                      : "bg-neutral-300 hover:bg-neutral-400"
+                  }`}
+                  onClick={() => setSelectedCategory("")}
+                >
+                  All
+                </span>
+                {categories.map((category: string, i: number) => (
+                  <span
+                    key={i}
+                    className={`text-lg capitalize px-4 py-2 rounded-lg cursor-pointer transition duration-300 ease-in-out ${
+                      category === selectedCategory
+                        ? "bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-600/70"
+                        : "bg-neutral-300 hover:bg-neutral-400"
+                    }`}
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="w-full mb-10">
+            <div className="container bg-white mx-auto p-5 flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
+              {menuItems.map((item: ItemProps, i: number) => (
+                <div
+                  key={i}
+                  className="w-full md:w-3/12 flex flex-row gap-4 p-5 bg-white shadow border border-neutral-200"
+                >
+                  <div className="w-40">
+                    <Image
+                      src={`/img/menu/${item.image}`}
+                      alt={`${item.name}`}
+                      width={100}
+                      height={100}
+                      quality={80}
+                      className="w-full h-32 object-cover rounded"
+                    ></Image>
+                  </div>
+                  <div className="flex flex-col gap-2  w-full justify-between">
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-lg font-semibold">{item.name}</h3>
+                      <p className="text-sm">${item.price}</p>
+                    </div>
+                    {item.avaliable ? (
+                      <>
+                        <div>
+                          <input
+                            type="number"
+                            id={`${item.id}`}
+                            min={1}
+                            className="w-full border border-neutral-300 rounded p-2"
+                            defaultValue={quantityOrder}
+                          />
+                        </div>
+                        <div>
+                          <button
+                            className="px-4 py-2 bg-orange-500 rounded text-white text-sm"
+                            onClick={(e) =>
+                              addToCart({
+                                item,
+                                elementInput: document.getElementById(
+                                  `${item.id}`
+                                ),
+                              })
+                            }
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div>
+                        <p className="text-sm text-red-500 font-semibold">
+                          Out of stock
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <CartInfo />
+        </main>
+      </BodyWrapper>
+
+      {/* modal */}
+      <div>
+        <Modal
+          isOpen={showModalCart && !errQuantityOrder}
+          onClose={() => closeModalCart()}
+          onSave={() => saveCart()}
+          showSaveButton
+        >
+          <div className="flex flex-col w-full items-center justify-center">
+            <div>
+              <h1 className="text-2xl">
+                <span>Are you sure to add </span>{" "}
+                <span className="font-bold">{selectedItems?.name}</span>
+                <span className="mx-2 text-orange-500">x{quantityOrder}</span>
+              </h1>
+            </div>
+            <div className="my-5">
               <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
+                className="w-full h-48 object-cover"
+                src={`/img/menu/${selectedItems?.image}`}
+                alt={`${selectedItems?.name}`}
                 width={100}
-                height={24}
-                priority
+                height={100}
+                quality={60}
               />
-            </a>
+            </div>
+            <div className="flex gap-4 text-2xl mt-10 font-bold">
+              <span>Total</span>
+              <span className="text-green-500">
+                ${(Number(selectedItems?.price) * quantityOrder).toFixed(2)}
+              </span>
+            </div>
           </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
+        </Modal>
+        <Modal
+          isOpen={errQuantityOrder}
+          onClose={() => setErrQuantityOrder(false)}
+        >
+          <div className="flex flex-col w-full items-center justify-center">
+            <div>
+              <h1 className="text-2xl">
+                <span>Quantity order must be greater than 0</span>
+              </h1>
+            </div>
           </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+        </Modal>
+      </div>
+      {/* end modal */}
     </>
-  )
+  );
 }
+
+type PageProps = {
+  categories: string[];
+};
+export const getServerSideProps: GetServerSideProps<PageProps> = async (
+  context
+) => {
+  const categories = await fetch("http://localhost:8000/categories").then(
+    (res) => res.json()
+  );
+  return {
+    props: {
+      categories,
+    },
+  };
+};

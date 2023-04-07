@@ -1,0 +1,124 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Burger",
+      "price": 5.99,
+      "category": "foods",
+      "avaliable": true,
+      "image": "burger.jpg"
+    },
+    {
+      "id": 2,
+      "name": "Coke",
+      "price": 1.99,
+      "category": "drinks",
+      "avaliable": true,
+      "image": "coke.jpeg"
+    },
+    {
+      "id": 3,
+      "name": "Ice Cream",
+      "price": 2.99,
+      "category": "deserts",
+      "avaliable": false,
+      "image": "ice-cream.jpeg"
+    },
+    {
+      "id": 4,
+      "name": "Fries",
+      "price": 1.99,
+      "category": "foods",
+      "avaliable": true,
+      "image": "fries.webp"
+    },
+    {
+      "id": 5,
+      "name": "Milkshake",
+      "price": 3.99,
+      "category": "drinks",
+      "avaliable": false,
+      "image": "milkshake.jpeg"
+    },
+    {
+      "id": 6,
+      "name": "Brownie",
+      "price": 2.99,
+      "category": "deserts",
+      "avaliable": true,
+      "image": "brownie.jpeg"
+    },
+    {
+      "id": 7,
+      "name": "Pizza",
+      "price": 7.99,
+      "category": "foods",
+      "avaliable": true,
+      "image": "pizza.jpeg"
+    },
+    {
+      "id": 8,
+      "name": "Soda",
+      "price": 1.99,
+      "category": "drinks",
+      "avaliable": true,
+      "image": "soda.webp"
+    },
+    {
+      "id": 9,
+      "name": "Cake",
+      "price": 3.99,
+      "category": "deserts",
+      "avaliable": true,
+      "image": "cake.jpg"
+    },
+    {
+      "id": 10,
+      "name": "Hot Dog",
+      "price": 2.99,
+      "category": "foods",
+      "avaliable": true,
+      "image": "hot-dog.jpg"
+    },
+    {
+      "id": 11,
+      "name": "Tea",
+      "price": 1.99,
+      "category": "drinks",
+      "avaliable": true,
+      "image": "tea.jpg"
+    },
+    {
+      "id": 12,
+      "name": "Cupcake",
+      "price": 2.99,
+      "category": "deserts",
+      "avaliable": true,
+      "image": "cupcake.jpg"
+    }
+  ],
+  "categories": [
+    "foods",
+    "drinks",
+    "deserts"
+  ],
+  "carts": [
+    {
+      "id": "19OYQtDuVTRY187SDmheg",
+      "name": "andi",
+      "phone": "1234566666",
+      "item": [
+        {
+          "id": 10,
+          "name": "Hot Dog",
+          "price": 2.99,
+          "category": "foods",
+          "avaliable": true,
+          "image": "https://1.bp.blogspot.com/-2RffC3SwUjM/WTP_nE2O1KI/AAAAAAAAAzY/4IpQwaFWehAQDggRZn6dVwt54r6DVM0GQCLcB/s1600/hotdogs.jpg",
+          "quantityOrder": 2
+        }
+      ]
+    }
+  ],
+  "orders": []
+}
